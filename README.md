@@ -1,6 +1,22 @@
-# Inkwell
+<div align="center">
 
-Markadan bağımsız, açık kaynak masaüstü yazıcı uygulaması. Baskı, durum ve bakım tek pencerede; Windows, macOS ve Linux için (Tauri 2 + Rust).
+# 🖨️ Inkwell
+
+**Markadan bağımsız, açık kaynak masaüstü yazıcı uygulaması**
+
+Baskı, durum ve bakım tek pencerede; Windows, macOS ve Linux için.
+
+![Rust](https://img.shields.io/badge/Rust-core-000000?style=flat-square&logo=rust&logoColor=white)
+![Tauri](https://img.shields.io/badge/Tauri-2-24C8DB?style=flat-square&logo=tauri&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-UI-646CFF?style=flat-square&logo=vite&logoColor=white)
+![pdf.js](https://img.shields.io/badge/pdf.js-önizleme-ef4444?style=flat-square)
+![Platforms](https://img.shields.io/badge/Windows%20·%20macOS%20·%20Linux-334155?style=flat-square)
+![Status](https://img.shields.io/badge/durum-ilk%20taslak-f59e0b?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)
+
+[Neler var](#bu-taslakta-ne-var) · [Mimari](#mimari) · [Çalıştırma](#çalıştırma) · [Yol haritası](#yol-haritası-kısa) · [English](#english-summary)
+
+</div>
 
 > **Durum: ilk taslak.** "Inkwell" geçici çalışma adıdır.
 >
@@ -84,7 +100,7 @@ npm install
 npm run tauri dev
 ```
 
-Çekirdek testleri (yazıcı gerekmez; kaydedilmiş yanıtlarla çalışır):
+Çekirdek testleri (yazıcı gerekmez; kaydedilmiş yanıtlarla çalışır, 9 test):
 
 ```bash
 cargo test -p inkwell-core
@@ -98,6 +114,16 @@ Test verileri `crates/inkwell-core/tests/fixtures/` altındadır; seri numarası
 - Ağda yazıcı bulma (mDNS)
 - Elle çift taraf sihirbazı, kitapçık modu, hazır profiller
 - Başka markalar için sürücüler
+
+## English summary
+
+**Inkwell** is a vendor-neutral, open-source desktop printer app (Tauri 2 + Rust) that brings printing,
+status and maintenance into one window. All brand-specific code lives in pluggable drivers under
+`crates/inkwell-core/src/drivers/`; the first one speaks **HP LEDM** (the XML endpoints of the printer's
+embedded web server). This draft shows live status, alerts, printhead part numbers, counters and the
+maintenance jobs the device itself advertises, plus PDF preview with print settings. Submitting print jobs
+(IPP Everywhere) and network discovery (mDNS) are on the roadmap. Tested on an HP Smart Tank 510.
+Not affiliated with or endorsed by HP or any other printer vendor.
 
 ## Lisans
 
