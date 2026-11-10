@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inkwell</title>
+    <script>
+      // Set the theme before first paint so there is no flash.
+      document.documentElement.dataset.theme =
+        localStorage.getItem('theme') ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    </script>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <header class="titlebar" data-tauri-drag-region>
+      <div class="tb-brand">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path d="M12 2.500s6.500 6.600 6.500 11.200a6.500 6.500 0 0 1-13 0C5.500 9.100 12 2.500 12 2.500z" fill="currentColor" />
+        </svg>
+        <span>Inkwell</span>
+      </div>
+      <div class="tb-actions">
+        <button id="themeBtn" class="tb-btn" title="Açık / koyu tema" aria-label="Açık / koyu tema">
+          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+            <circle cx="12" cy="12" r="8.500" fill="none" stroke="currentColor" stroke-width="1.800" />
+            <path d="M12 3.500a8.500 8.500 0 0 1 0 17z" fill="currentColor" />
+          </svg>
+        </button>
+        <span class="tb-sep"></span>
+        <button id="winMin" class="tb-btn" aria-label="Küçült">
+          <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M2 6h8" stroke="currentColor" stroke-width="1.200" /></svg>
+        </button>
+        <button id="winMax" class="tb-btn" aria-label="Ekranı kapla">
+          <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><rect x="2.500" y="2.500" width="7" height="7" rx="1.200" fill="none" stroke="currentColor" stroke-width="1.200" /></svg>
+        </button>
+        <button id="winClose" class="tb-btn close" aria-label="Kapat">
+          <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M2.500 2.500l7 7M9.500 2.500l-7 7" stroke="currentColor" stroke-width="1.200" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="app">
+      <aside id="rail" class="rail" aria-label="Yazıcı"></aside>
+
+      <main id="stage" class="stage" aria-label="Önizleme">
+        <div id="empty" class="empty">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+              <path d="M7 3h7l5 5v13H7z" /><path d="M14 3v5h5" /><path d="M12 17v-5M9.500 14.500 12 12l2.500 2.500" />
+            </svg>
+          </div>
+          <h1>PDF'i buraya bırak</h1>
+          <p>ya da <button id="pickBtn" class="link">dosya seç</button> <kbd>Ctrl</kbd><kbd>O</kbd></p>
+          <input id="fileInput" type="file" accept="application/pdf" hidden />
+        </div>
+        <div id="doc" class="doc" hidden>
+          <div class="doc-pill">
+            <span id="docName" class="doc-name"></span>
+            <span id="docPages" class="doc-count"></span>
+            <button id="closeDoc" class="pill-x" aria-label="Belgeyi kapat">
+              <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><path d="M2.500 2.500l7 7M9.500 2.500l-7 7" stroke="currentColor" stroke-width="1.400" /></svg>
+            </button>
+          </div>
+          <div id="pages" class="pages"></div>
+        </div>
+      </main>
+
+      <aside class="inspector" aria-label="Baskı ayarları">
+        <div class="insp-scroll">
+          <h2>Baskı</h2>
+
+          <div class="field inline">
+            <span class="label">Kopya</span>
+            <div class="stepper">
+              <button id="copiesDown" aria-label="Azalt">−</button>
+              <input id="copies" inputmode="numeric" value="1" aria-label="Kopya sayısı" />
+              <button id="copiesUp" aria-label="Artır">+</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="label">Renk</span>
+            <div class="seg" style="--n: 2" role="radiogroup" aria-label="Renk">
+              <label><input type="radio" name="color" value="true" checked /><span><i class="swatch cmy"></i>Renkli</span></label>
+              <label><input type="radio" name="color" value="false" /><span><i class="swatch k"></i>Siyah-beyaz</span></label>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="label">Kalite</span>
+            <div class="seg" style="--n: 3" role="radiogroup" aria-label="Kalite">
+              <label><input type="radio" name="quality" value="draft" /><span>Taslak</span></label>
+              <label><input type="radio" name="quality" value="normal" checked /><span>Normal</span></label>
+              <label><input type="radio" name="quality" value="best" /><span>En iyi</span></label>
+            </div>
+          </div>
+
+          <div class="field inline">
+            <label class="label" for="media">Kâğıt</label>
+            <select id="media">
+              <option value="iso_a4_210x297mm">A4</option>
+              <option value="iso_a5_148x210mm">A5</option>
+              <option value="na_letter_8.5x11in">Letter</option>
+              <option value="om_small-photo_100x150mm">10 × 15 cm</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <span class="label">Çift taraf</span>
+            <div class="flip" role="radiogroup" aria-label="Çift taraf">
+              <label>
+                <input type="radio" name="duplex" value="oneSided" checked />
+                <span class="flip-card">
+                  <svg viewBox="0 0 64 48" aria-hidden="true">
+                    <rect x="21" y="6" width="22" height="36" rx="2.500" class="sheet" />
+                    <path d="M26 15h12M26 21h12M26 27h7" class="lines" />
+                  </svg>
+                  <span>Tek taraf</span>
+                </span>
+              </label>
+              <label>
+                <input type="radio" name="duplex" value="flipLikeBook" />
+                <span class="flip-card">
+                  <svg viewBox="0 0 64 48" aria-hidden="true">
+                    <rect x="9" y="10" width="22" height="32" rx="2.500" class="sheet" />
+                    <rect x="33" y="10" width="22" height="32" rx="2.500" class="sheet turning" />
+                    <path d="M32 8v36" class="spine" />
+                    <path d="M41 6c-5-4-13-4-18 0" class="arrow" />
+                    <path d="M23 6l.500-4M23 6l4 .500" class="arrow" />
+                  </svg>
+                  <span>Kitap gibi</span>
+                </span>
+              </label>
+              <label>
+                <input type="radio" name="duplex" value="flipLikeCalendar" />
+                <span class="flip-card">
+                  <svg viewBox="0 0 64 48" aria-hidden="true">
+                    <rect x="16" y="3" width="28" height="19" rx="2.500" class="sheet turning" />
+                    <rect x="16" y="26" width="28" height="19" rx="2.500" class="sheet" />
+                    <path d="M14 24h32" class="spine" />
+                    <path d="M51 32c4-5 4-11 0-16" class="arrow" />
+                    <path d="M51 16l4 .500M51 16l-.500 4" class="arrow" />
+                  </svg>
+                  <span>Takvim gibi</span>
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="insp-foot">
+          <p id="summary" class="summary"></p>
+          <button id="printBtn" class="print" disabled>
+            <span>Yazdır</span>
+            <span class="keys"><kbd>Ctrl</kbd><kbd>P</kbd></span>
+          </button>
+        </div>
+      </aside>
+    </div>
+
+    <dialog id="confirm">
+      <div class="dlg-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <path d="M12 2.500s6.500 6.600 6.500 11.200a6.500 6.500 0 0 1-13 0C5.500 9.100 12 2.500 12 2.500z" fill="currentColor" />
+        </svg>
+      </div>
+      <h3 id="confirmTitle"></h3>
+      <p>Bu işlem <strong>mürekkep harcar</strong> ve bir sayfa basar. Yazıcıda kâğıt olduğundan emin ol.</p>
+      <p class="dlg-note">Deneysel: komut bu sürümde gerçek cihazda henüz doğrulanmadı.</p>
+      <form method="dialog" class="dlg-actions">
+        <button class="btn ghost" value="cancel">Vazgeç</button>
+        <button class="btn solid" value="ok">Başlat</button>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" hidden></div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

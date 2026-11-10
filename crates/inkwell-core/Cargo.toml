@@ -1,0 +1,11 @@
+[package]
+name = "inkwell-core"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Vendor-neutral printer core: printing, status and maintenance behind driver traits"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+ureq = { version = "2", default-features = false }
+roxmltree = "0.20"
